@@ -2,6 +2,9 @@ package tehnut.assembler;
 
 import java.util.Locale;
 
+/**
+ * Used to determine which folder(s) each file goes into.
+ */
 public enum Side {
 
     COMMON,

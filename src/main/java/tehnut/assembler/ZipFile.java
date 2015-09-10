@@ -11,24 +11,38 @@ import java.util.zip.ZipOutputStream;
 public class ZipFile {
 
     String outputZip;
-    Side type;
+    Side side;
     List<File> files = new ArrayList<>();
 
-    public ZipFile(Side type) {
-        this.type = type;
-        this.outputZip = Assembler.getZipName(type) + ".zip";
+    /**
+     *
+     * @param side - The {@link Side} to build the zip for.
+     */
+    public ZipFile(Side side) {
+        this.side = side;
+        this.outputZip = Assembler.getZipName(side) + ".zip";
     }
 
+    /**
+     * Generates a list of all files to be added to the zip folder.
+     *
+     * @return - Returns itself for chaining if needed.
+     */
     public ZipFile generateFileList() {
         generateFiles(new File(Assembler.getWorkingDirectory() + "/config"), "config");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + type.toString()), "mods");
+        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + side.toString()), "mods");
         generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + Side.COMMON.toString()), "mods");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + type.toString()), "extra");
+        generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + side.toString()), "extra");
         generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + Side.COMMON.toString()), "extra");
 
         return this;
     }
 
+    /**
+     * Zips up the files generated from {@code generateFileList()}.
+     *
+     * @return - Returns itself for chaining if needed.
+     */
     public ZipFile zipIt() {
 
         try {
@@ -57,8 +71,12 @@ public class ZipFile {
         return this;
     }
 
+    /**
+     * @param folder   - The folder to scan for files.
+     * @param fileType - The type of folder. Generally {@code config}, {@code mods}, or {@code extra}
+     */
+    @SuppressWarnings("ConstantConditions")
     private void generateFiles(File folder, String fileType) {
-
         if (folder != null && folder.isDirectory()) {
             for (File file : folder.listFiles()) {
                 File add = new File(fileType + File.separator + file.getName());
