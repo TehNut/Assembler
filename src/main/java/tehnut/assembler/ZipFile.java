@@ -11,7 +11,7 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipFile {
 
-    String outputZip;
+    String outputZip, parent = "";
     Side side;
     Map<File, String> relativePath = new HashMap<>();
 
@@ -21,6 +21,8 @@ public class ZipFile {
      */
     public ZipFile(Side side) {
         this.side = side;
+        if (side == Side.CLIENT)
+            parent = "minecraft/";
         this.outputZip = Assembler.getZipName(side) + ".zip";
     }
 
@@ -30,9 +32,9 @@ public class ZipFile {
      * @return - Returns itself for chaining if needed.
      */
     public ZipFile generateFileList() {
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/config"), side == Side.CLIENT ? "minecraft/config" : "config");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + side.toString()), side == Side.CLIENT ? "minecraft/mods" : "mods");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + Side.COMMON.toString()), side == Side.CLIENT ? "minecraft/mods" : "mods");
+        generateFiles(new File(Assembler.getWorkingDirectory() + "/config"), parent + "config");
+        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + side.toString()), parent + "mods");
+        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + Side.COMMON.toString()), parent + "mods");
         generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + side.toString()), "");
         generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + Side.COMMON.toString()), "");
 
@@ -55,6 +57,7 @@ public class ZipFile {
                 if (file.isFile()) {
                     FileInputStream inputStream = new FileInputStream(file);
                     outputStream.putNextEntry(new ZipEntry(relativePath.get(file)));
+                    Assembler.info("Zipping file: " + relativePath.get(file));
 
                     int length;
                     while ((length = inputStream.read(buffer)) > 0)
@@ -63,7 +66,7 @@ public class ZipFile {
                     outputStream.closeEntry();
                     inputStream.close();
                 } else {
-                    addDirToArchive(outputStream, file, "");
+                    addDirToArchive(outputStream, file, !file.getParentFile().getName().equalsIgnoreCase(side.toString()) ? parent + file.getParentFile().getName() : "");
                 }
             }
 
@@ -86,9 +89,9 @@ public class ZipFile {
     private void generateFiles(File folder, String fileType) {
         if (folder != null && folder.isDirectory()) {
             for (File file : folder.listFiles()) {
-                String relPath = fileType.equals("") ? file.getName() : fileType + File.separator + file.getName();
+                String relPath = fileType.equals("") ? file.getName() : fileType + "/" + file.getName();
                 relativePath.put(file, relPath);
-                Assembler.info("Added file: " + relPath);
+                Assembler.info("Adding file: " + relPath);
             }
         }
     }
@@ -104,7 +107,7 @@ public class ZipFile {
     private void addDirToArchive(ZipOutputStream outputStream, File srcFile, String parent) {
         for (File file : srcFile.listFiles()) {
             if (file.isDirectory()) {
-                addDirToArchive(outputStream, file, parent.equals("") ? srcFile.getName() : parent + File.separator + srcFile.getName());
+                addDirToArchive(outputStream, file, parent.equals("") ? srcFile.getName() : parent + "/" + srcFile.getName());
                 continue;
             }
 
@@ -112,8 +115,9 @@ public class ZipFile {
                 byte[] buffer = new byte[1024];
 
                 FileInputStream fis = new FileInputStream(file);
-                String entry = parent.equals("") ? srcFile.getName() + File.separator + file.getName() : parent + File.separator + srcFile.getName() + File.separator + file.getName();
+                String entry = parent.equals("") ? srcFile.getName() + "/" + file.getName() : parent + "/" + srcFile.getName() + "/" + file.getName();
                 outputStream.putNextEntry(new ZipEntry(entry));
+                Assembler.info("Zipping file: " + entry);
 
                 int length;
 
