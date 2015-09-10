@@ -1,6 +1,10 @@
-#Assembler
+#Assembler [![Build Status](http://tehnut.info/jenkins/buildStatus/icon?job=Assembler)](http://tehnut.info/jenkins/job/Assembler)
 
 A simple utility to assemble modpacks into the FTB modpack format. Built originally for the TPPI Team, but anybody is free to use it.
+
+##Builds
+
+Builds can be found [here](http://tehnut.info/jenkins/job/Assembler/).
 
 ##What it does
 
