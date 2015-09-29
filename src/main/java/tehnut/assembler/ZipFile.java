@@ -32,11 +32,11 @@ public class ZipFile {
      * @return - Returns itself for chaining if needed.
      */
     public ZipFile generateFileList() {
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/config"), parent + "config");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + side.toString()), parent + "mods");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/mods/" + Side.COMMON.toString()), parent + "mods");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + side.toString()), "");
-        generateFiles(new File(Assembler.getWorkingDirectory() + "/extra/" + Side.COMMON.toString()), "");
+        generateFiles(new File(Assembler.packDir + "/config"), parent + "config");
+        generateFiles(new File(Assembler.packDir + "/mods/" + side.toString()), parent + "mods");
+        generateFiles(new File(Assembler.packDir + "/mods/" + Side.COMMON.toString()), parent + "mods");
+        generateFiles(new File(Assembler.packDir + "/extra/" + side.toString()), "");
+        generateFiles(new File(Assembler.packDir + "/extra/" + Side.COMMON.toString()), "");
 
         return this;
     }
@@ -66,7 +66,7 @@ public class ZipFile {
                     outputStream.closeEntry();
                     inputStream.close();
                 } else {
-                    addDirToArchive(outputStream, file, !file.getParentFile().getName().equalsIgnoreCase(side.toString()) ? parent + file.getParentFile().getName() : "");
+                    addDirToArchive(outputStream, file, relativePath.get(file));
                 }
             }
 
@@ -89,7 +89,13 @@ public class ZipFile {
     private void generateFiles(File folder, String fileType) {
         if (folder != null && folder.isDirectory()) {
             for (File file : folder.listFiles()) {
-                String relPath = fileType.equals("") ? file.getName() : fileType + "/" + file.getName();
+                String relPath = fileType;
+                if (!file.isDirectory()) {
+                    relPath += "/" + file.getName();
+                }
+                if (relPath.startsWith("/")) {
+                    relPath = relPath.substring(1);
+                }
                 relativePath.put(file, relPath);
                 Assembler.info("Adding file: " + relPath);
             }
